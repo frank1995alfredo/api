@@ -1,9 +1,10 @@
 package modelos
 
 import (
+	"github.com/frank1995alfedo/api/modelos"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-)
+	 "github.com/jinzhu/gorm/dialects/postgres"
+
 
 //DB ...
 var DB *gorm.DB
@@ -14,7 +15,10 @@ func ConectorBD() {
 	if err != nil {
 		panic("ERROR al conectar con la base de datos.")
 	}
-	bd.AutoMigrate(&Libros{})
+
+	
+    
+	bd.AutoMigrate()
 
 	DB = bd
 }

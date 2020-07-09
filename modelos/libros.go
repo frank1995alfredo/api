@@ -1,11 +1,16 @@
 package modelos
 
-import "github.com/jinzhu/gorm"
+import (
+	"fmt"
+)
 
 //Libro ... modelo libro
 type Libro struct {
-	gorm.Model
 	ID     uint   `json:"id" gorm:"primary_key"`
 	Titulo string `json:"titulo"`
 	Autor  string `json:"autor"`
+}
+
+func nombre() {
+	fmt.Print()
 }
