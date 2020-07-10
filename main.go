@@ -1,18 +1,11 @@
 package main
 
 import (
-	"github.com/frank1995alfredo/api/controllers"
-	"github.com/frank1995alfredo/api/models"
-	"github.com/gin-gonic/gin"
+	"github.com/frank1995alfredo/api/routes"
 )
 
 func main() {
 
-	r := gin.Default()
+	routes.RutasLibros()
 
-	models.ConectorBD()
-
-	r.GET("/libros", controllers.ObtenerLibros)
-
-	r.Run()
 }

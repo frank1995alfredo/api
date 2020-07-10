@@ -4,6 +4,8 @@ import (
 	"log"
 
 	"github.com/jinzhu/gorm"
+
+	//github.com/lib/pq ... libreria para manejar los pq, controla los orm
 	_ "github.com/lib/pq"
 )
 
