@@ -1,11 +1,18 @@
 package main
 
 import (
-	"github.com/frank1995alfredo/api/routes"
+	"fmt"
+
+	_ "github.com/frank1995alfredo/api/routes"
 )
 
 func main() {
 
-	routes.RutasLibros()
+	//routes.Rutas()
+
+	var nums []int
+	nums = make([]int, 3)
+	nums[0] = 5
+	fmt.Println(nums)
 
 }

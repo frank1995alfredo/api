@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	//sgsd
 
 	"github.com/frank1995alfredo/api/models"
 	"github.com/gin-gonic/gin"
@@ -12,6 +13,8 @@ func ObtenerLibros(c *gin.Context) {
 	var libros []models.Libro
 
 	models.DB.Order("id").Find(&libros)
+
+	c.Header("Access-Control-Allow-Origin", "*")
 
 	c.JSON(http.StatusOK, gin.H{"data": libros})
 }
@@ -30,6 +33,8 @@ func CrearLibro(c *gin.Context) {
 	libro := models.Libro{Titulo: input.Titulo, Autor: input.Autor}
 	models.DB.Create(&libro)
 
+	c.Header("Access-Control-Allow-Origin", "*")
+
 	c.JSON(http.StatusOK, gin.H{"data": libro})
 }
 
@@ -41,6 +46,9 @@ func BuscarLibro(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No encontrado"})
 		return
 	}
+
+	c.Header("Access-Control-Allow-Origin", "*")
+
 	c.JSON(http.StatusOK, gin.H{"data": libro})
 }
 
@@ -62,6 +70,8 @@ func ActualizarLibro(c *gin.Context) {
 
 	models.DB.Model(&libro).Updates(input)
 
+	c.Header("Access-Control-Allow-Origin", "*")
+
 	c.JSON(http.StatusOK, gin.H{"data": libro})
 }
 
@@ -75,6 +85,8 @@ func EliminarLibro(c *gin.Context) {
 	}
 
 	models.DB.Delete(&libro)
+
+	c.Header("Access-Control-Allow-Origin", "*")
 
 	c.JSON(http.StatusOK, gin.H{"data": true})
 }
