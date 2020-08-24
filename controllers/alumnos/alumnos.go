@@ -1,10 +1,10 @@
-package controllers
+package alumnos
 
 import (
 	"net/http"
 
-	"github.com/frank1995alfredo/api/models"
-	"github.com/frank1995alfredo/api/models/maestroalumno"
+	database "github.com/frank1995alfredo/api/database"
+	maestroalumno "github.com/frank1995alfredo/api/models/maestroalumno"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,9 +13,7 @@ import (
 func ObtenerAlumnos(c *gin.Context) {
 	var alumno []maestroalumno.Alumno
 
-	models.DB.Order("alumno_id").Find(&alumno)
-
-	c.Header("Access-Control-Allow-Origin", "*")
+	database.DB.Order("alumno_id").Find(&alumno)
 
 	c.JSON(http.StatusOK, gin.H{"data": alumno})
 }
@@ -33,9 +31,14 @@ func CrearAlumno(c *gin.Context) {
 	//crea la persona en la base de datos
 	alumno := maestroalumno.Alumno{Nombre: input.Nombre, Apellido: input.Apellido, Edad: input.Edad, MaesID: input.MaesID}
 
-	models.DB.Create(&alumno)
+	database.DB.Create(&alumno)
 
-	c.Header("Access-Control-Allow-Origin", "*")
+	tx := database.DB.Begin()
+	err := tx.Create(&alumno).Error //si no hay un error, se guarda el articulo
+	if err != nil {
+		tx.Rollback()
+	}
+	tx.Commit()
 
 	c.JSON(http.StatusBadRequest, gin.H{"data": alumno})
 }

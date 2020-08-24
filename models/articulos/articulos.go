@@ -3,11 +3,11 @@ package articulos
 //Articulo ...
 type Articulo struct {
 	ArticuloID int     `json:"idarticulo" gorm:"primary_key"`
+	CatID      int     `json:"catid" gorm:"not null"`
 	Nombre     string  `json:"nombre" gorm:"size:50"`
 	Precio     float64 `json:"precio"`
 	Cantidad   int     `json:"cantidad"`
 	Total      float64 `json:"total"`
-	CatID      int     `json:"catid" gorm:"not null"`
 }
 
 //Categoria ...
@@ -27,16 +27,16 @@ type ArticuloCategoria struct {
 //CrearArticuloInput ... estrucura con los campos que se van a validar para insertar
 type CrearArticuloInput struct {
 	Nombre   string  `json:"nombre" binding:"required"`
-	Precio   float64 `json:"precio" binding:"required"`
-	Cantidad int     `json:"cantidad" binding:"required"`
-	CatID    int     `json:"catid" binding:"required"`
+	CatID    int     `json:"catid,string" binding:"required"`
+	Precio   float64 `json:"precio,string" binding:"required"`
+	Cantidad int     `json:"cantidad,string" binding:"required"`
 }
 
 //ActualiarArticuloInput ... estrucura con los campos que se van a validar para actualizar
 type ActualiarArticuloInput struct {
 	Nombre   string  `json:"nombre" binding:"required"`
-	Precio   float64 `json:"precio" binding:"required"`
-	Cantidad int     `json:"cantidad" binding:"required"`
+	Precio   float64 `json:"precio,string" binding:"required"`
+	Cantidad int     `json:"cantidad,string" binding:"required"`
 }
 
 //CrearCategoriaInput ... estrucura con los campos que se van a validar para insertar

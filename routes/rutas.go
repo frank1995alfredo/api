@@ -1,70 +1,74 @@
 package routes
 
 import (
-	"github.com/frank1995alfredo/api/controllers"
-	"github.com/frank1995alfredo/api/controllers/articulo"
-
-	_ "github.com/frank1995alfredo/api/controllers"          //fsdf
-	_ "github.com/frank1995alfredo/api/controllers/articulo" // sfdsd
+	alumnos "github.com/frank1995alfredo/api/controllers/alumnos"
+	articulos "github.com/frank1995alfredo/api/controllers/articulos"
+	libros "github.com/frank1995alfredo/api/controllers/libros"
+	maestros "github.com/frank1995alfredo/api/controllers/maestros"
+	personas "github.com/frank1995alfredo/api/controllers/personas"
 
 	//sdfsdf
-	"github.com/frank1995alfredo/api/models"
+	database "github.com/frank1995alfredo/api/database"
+
+	config "github.com/frank1995alfredo/api/config"
 	"github.com/gin-gonic/gin"
 )
 
 //Rutas ... funcion para guardar las rutas
 func Rutas() {
 	r := gin.Default()
+	r.Use(config.CORS)
 
-	defer models.DB.Close()
+	defer database.DB.Close()
 
 	libro := r.Group("/libros")
 	{
 
-		libro.GET("/obtenerLibros", controllers.ObtenerLibros)
-		libro.POST("/crearLibro", controllers.CrearLibro)
-		libro.GET("/buscarLibro/:id", controllers.BuscarLibro)
-		libro.PATCH("/actualizarLibro/:id", controllers.ActualizarLibro)
-		libro.DELETE("/eliminarLibro/:id", controllers.EliminarLibro)
+		libro.GET("/obtenerLibros", libros.ObtenerLibros)
+		libro.POST("/crearLibro", libros.CrearLibro)
+		libro.GET("/buscarLibro/:id", libros.BuscarLibro)
+		libro.PATCH("/actualizarLibro/:id", libros.ActualizarLibro)
+		libro.DELETE("/eliminarLibro/:id", libros.EliminarLibro)
 	}
 	persona := r.Group("/personas")
 	{
-		persona.GET("/obtenerPersona", controllers.ObtenerPersona)
-		persona.POST("/crearPersona", controllers.CrearPersona)
-		persona.GET("/buscarPersona/:id", controllers.BuscarPersona)
-		persona.PATCH("/actualizarPersona/:id", controllers.ActualizarPersona)
-		persona.DELETE("/eliminarPersona/:id", controllers.EliminarPersona)
+		persona.GET("/obtenerPersona", personas.ObtenerPersona)
+		persona.POST("/crearPersona", personas.CrearPersona)
+		persona.GET("/buscarPersona/:id", personas.BuscarPersona)
+		persona.PATCH("/actualizarPersona/:id", personas.ActualizarPersona)
+		persona.DELETE("/eliminarPersona/:id", personas.EliminarPersona)
 	}
 
-	alumnos := r.Group("/alumnos")
+	alumno := r.Group("/alumnos")
 	{
-		alumnos.GET("/obtenerAlumno", controllers.ObtenerAlumnos)
-		alumnos.POST("/crearAlumno", controllers.CrearAlumno)
+		alumno.GET("/obtenerAlumno", alumnos.ObtenerAlumnos)
+		alumno.POST("/crearAlumno", alumnos.CrearAlumno)
 	}
 
-	maestros := r.Group("/maestros")
+	maestro := r.Group("/maestros")
 	{
-		maestros.GET("/obtenerMaestro", controllers.ObtenerMaestros)
-		maestros.POST("/crearMaestro", controllers.CrearMaestro)
-		maestros.GET("/buscarMaestro/:id", controllers.BuscarMaestro)
-		maestros.PATCH("/actualizarMaestro/:id", controllers.ActualizarMaestro)
+		maestro.GET("/obtenerMaestro", maestros.ObtenerMaestros)
+		maestro.POST("/crearMaestro", maestros.CrearMaestro)
+		maestro.GET("/buscarMaestro/:id", maestros.BuscarMaestro)
+		maestro.PATCH("/actualizarMaestro/:id", maestros.ActualizarMaestro)
 	}
 
 	categorias := r.Group("/categorias")
 	{
-		categorias.GET("/obtenerCategoria", articulo.ObtenerCategoria)
-		categorias.POST("/crearCategoria", articulo.CrearCategoria)
+		categorias.GET("/obtenerCategoria", articulos.ObtenerCategoria)
+		categorias.POST("/crearCategoria", articulos.CrearCategoria)
 	}
 
-	articulos := r.Group("/articulos")
+	articulo := r.Group("/articulos")
 	{
-		articulos.GET("/obtenerArticulo", articulo.ObtenerArticulos)
-		articulos.GET("/listArticulo", articulo.PresentarArticuloCategoria)
-		articulos.POST("/crearArticulo", articulo.CrearArticulo)
-		articulos.GET("/buscarArticulo/:id", articulo.BuscarArticulo)
-		articulos.PATCH("/actualizarArticulo/:id", articulo.ActualizarArticulo)
+		articulo.GET("/obtenerArticulo", articulos.ObtenerArticulos)
+		articulo.GET("/listArticulo", articulos.PresentarArticuloCategoria)
+		articulo.POST("/crearArticulo", articulos.CrearArticulo)
+		articulo.GET("/buscarArticulo/:id", articulos.BuscarArticulo)
+		articulo.PATCH("/actualizarArticulo/:id", articulos.ActualizarArticulo)
 	}
 	//RutasLibros()
-	models.ConectorBD()
+	database.ConectorBD()
+
 	r.Run()
 }

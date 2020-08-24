@@ -1,10 +1,10 @@
-package articulo
+package articulos
 
 import (
 	"net/http"
 
-	"github.com/frank1995alfredo/api/models"
-	"github.com/frank1995alfredo/api/models/articulos"
+	database "github.com/frank1995alfredo/api/database"
+	articulos "github.com/frank1995alfredo/api/models/articulos"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,7 +14,7 @@ import (
 func ObtenerArticulos(c *gin.Context) {
 	var articulos []articulos.Articulo
 
-	models.DB.Order("articulo_id").Find(&articulos)
+	database.DB.Order("articulo_id").Find(&articulos)
 
 	c.Header("Access-Control-Allow-Origin", "*")
 
@@ -41,15 +41,15 @@ func CrearArticulo(c *gin.Context) {
 	articulo := articulos.Articulo{Nombre: input.Nombre, Precio: input.Precio, Cantidad: input.Cantidad, Total: total, CatID: input.CatID}
 
 	//inicio de la transaccion
-	tx := models.DB.Begin()
-	err := tx.Create(&articulo).Error
+	tx := database.DB.Begin()
+	err := tx.Create(&articulo).Error //si no hay un error, se guarda el articulo
 	if err != nil {
 		tx.Rollback()
 	}
 	tx.Commit()
 	//fin de la transaccion
 
-	c.Header("Access-Control-Allow-Origin", "*")
+	//c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 
 	c.JSON(http.StatusOK, gin.H{"data": articulo})
 
@@ -59,7 +59,7 @@ func CrearArticulo(c *gin.Context) {
 func BuscarArticulo(c *gin.Context) {
 	var articulo articulos.Articulo
 
-	if err := models.DB.Where("id=?", c.Param("id")).First(&articulo).Error; err != nil {
+	if err := database.DB.Where("id=?", c.Param("id")).First(&articulo).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No existe ese articulo"})
 		return
 	}
@@ -73,10 +73,11 @@ func BuscarArticulo(c *gin.Context) {
 func ActualizarArticulo(c *gin.Context) {
 	var articulo articulos.Articulo
 
-	if err := models.DB.Where("id=?", c.Param("id")).First(&articulo).Error; err != nil {
+	if err := database.DB.Where("id=?", c.Param("id")).First(&articulo).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Articulo no encontrado"})
 	}
 
+	c.Header("Access-Control-Allow-Origin", "*")
 	//validamos la entrada de los datos
 	var input articulos.ActualiarArticuloInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -91,7 +92,7 @@ func ActualizarArticulo(c *gin.Context) {
 	art := articulos.Articulo{Nombre: input.Nombre, Precio: input.Precio, Cantidad: input.Cantidad, Total: total}
 
 	//inicio de la transaccion
-	tx := models.DB.Begin()
+	tx := database.DB.Begin()
 	err := tx.Model(&articulo).Update(art).Error
 	if err != nil {
 		tx.Rollback()
@@ -108,13 +109,13 @@ func ActualizarArticulo(c *gin.Context) {
 func EliminarArticulo(c *gin.Context) {
 	var articulo articulos.Articulo
 
-	if err := models.DB.Where("id=?", c.Param("id")).First(&articulo).Error; err != nil {
+	if err := database.DB.Where("id=?", c.Param("id")).First(&articulo).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Articulo no encontrado"})
 		return
 	}
 
 	//inicio de la transaccion
-	tx := models.DB.Begin()
+	tx := database.DB.Begin()
 	err := tx.Delete(&articulo).Error
 	if err != nil {
 		tx.Rollback()
@@ -133,7 +134,7 @@ func EliminarArticulo(c *gin.Context) {
 func ObtenerCategoria(c *gin.Context) {
 	var categoria []articulos.Categoria
 
-	models.DB.Order("categoria_id").Select("descripcion").Find(&categoria)
+	database.DB.Order("categoria_id").Select("descripcion").Find(&categoria)
 
 	c.Header("Access-Control-Allow-Origin", "*")
 
@@ -154,7 +155,7 @@ func CrearCategoria(c *gin.Context) {
 	categoria := articulos.Categoria{Descripcion: input.Descripcion}
 
 	//inicio de la transaccion
-	tx := models.DB.Begin()
+	tx := database.DB.Begin()
 	err := tx.Create(&categoria).Error
 	if err != nil {
 		tx.Rollback()
@@ -174,7 +175,7 @@ func PresentarArticuloCategoria(c *gin.Context) {
 
 	var catArticulo []articulos.ArticuloCategoria
 
-	models.DB.Table("articulos").Order("articulo_id").Select("articulos.nombre, articulos.precio, articulos.cantidad, articulos.total," +
+	database.DB.Table("articulos").Order("articulo_id").Select("articulos.nombre, articulos.precio, articulos.cantidad, articulos.total," +
 		"categoria.descripcion").Joins("JOIN categoria ON articulos.cat_id = categoria.categoria_id").Find(&catArticulo)
 
 	c.Header("Access-Control-Allow-Origin", "*")

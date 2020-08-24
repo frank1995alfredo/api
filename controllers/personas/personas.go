@@ -1,10 +1,10 @@
-package controllers
+package personas
 
 import (
 	"net/http"
 
-	"github.com/frank1995alfredo/api/models"
-	"github.com/frank1995alfredo/api/models/personas"
+	database "github.com/frank1995alfredo/api/database"
+	personas "github.com/frank1995alfredo/api/models/personas"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,9 +12,7 @@ import (
 func ObtenerPersona(c *gin.Context) {
 	var personas []personas.Persona
 
-	models.DB.Order("id").Find(&personas)
-
-	c.Header("Access-Control-Allow-Origin", "*")
+	database.DB.Order("id").Find(&personas)
 
 	c.JSON(http.StatusOK, gin.H{"data": personas})
 
@@ -31,16 +29,20 @@ func CrearPersona(c *gin.Context) {
 		return
 	}
 
-	if err := models.DB.Where("num_cedula=?", input.NumCedula).First(&per).Error; err == nil {
+	if err := database.DB.Where("num_cedula=?", input.NumCedula).First(&per).Error; err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Ya existe una cedula con ese numero"})
 		return
 	}
 
 	//crea la persona en la base de datos
 	persona := personas.Persona{Nombre: input.Nombre, Apellido: input.Apellido, NumCedula: input.NumCedula}
-	models.DB.Create(&persona)
 
-	c.Header("Access-Control-Allow-Origin", "*")
+	tx := database.DB.Begin()
+	err := tx.Create(&persona).Error //si no hay un error, se guarda el articulo
+	if err != nil {
+		tx.Rollback()
+	}
+	tx.Commit()
 
 	c.JSON(http.StatusBadRequest, gin.H{"data": persona})
 }
@@ -49,12 +51,10 @@ func CrearPersona(c *gin.Context) {
 func BuscarPersona(c *gin.Context) {
 	var persona personas.Persona
 
-	if err := models.DB.Where("id=?", c.Param("id")).First(&persona).Error; err != nil {
+	if err := database.DB.Where("id=?", c.Param("id")).First(&persona).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No existe esa persona con ese id"})
 		return
 	}
-
-	c.Header("Access-Control-Allow-Origin", "*")
 
 	c.JSON(http.StatusOK, gin.H{"data": persona})
 }
@@ -63,7 +63,7 @@ func BuscarPersona(c *gin.Context) {
 func ActualizarPersona(c *gin.Context) {
 	var persona personas.Persona
 
-	if err := models.DB.Where("id=?", c.Param("id")).First(&persona).Error; err != nil {
+	if err := database.DB.Where("id=?", c.Param("id")).First(&persona).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Persona no econtrada"})
 	}
 
@@ -74,9 +74,12 @@ func ActualizarPersona(c *gin.Context) {
 		return
 	}
 
-	models.DB.Model(&persona).Updates(input)
-
-	c.Header("Access-Control-Allow-Origin", "*")
+	tx := database.DB.Begin()
+	err := tx.Model(&persona).Updates(input).Error //si no hay un error, se guarda el articulo
+	if err != nil {
+		tx.Rollback()
+	}
+	tx.Commit()
 
 	c.JSON(http.StatusOK, gin.H{"data": persona})
 }
@@ -85,14 +88,17 @@ func ActualizarPersona(c *gin.Context) {
 func EliminarPersona(c *gin.Context) {
 	var persona personas.Persona
 
-	if err := models.DB.Where("id=?", c.Param("id")).First(&persona).Error; err != nil {
+	if err := database.DB.Where("id=?", c.Param("id")).First(&persona).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Persona no encontrada"})
 		return
 	}
 
-	models.DB.Delete(&persona)
-
-	c.Header("Access-Control-Allow-Origin", "*")
+	tx := database.DB.Begin()
+	err := tx.Delete(&persona).Error //si no hay un error, se guarda el articulo
+	if err != nil {
+		tx.Rollback()
+	}
+	tx.Commit()
 
 	c.JSON(http.StatusOK, gin.H{"data": "Persona eliminada"})
 }

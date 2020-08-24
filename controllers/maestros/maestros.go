@@ -1,10 +1,10 @@
-package controllers
+package maestros
 
 import (
 	"net/http"
 
-	"github.com/frank1995alfredo/api/models"
-	"github.com/frank1995alfredo/api/models/maestroalumno"
+	database "github.com/frank1995alfredo/api/database"
+	maestroalumno "github.com/frank1995alfredo/api/models/maestroalumno"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,9 +12,7 @@ import (
 func ObtenerMaestros(c *gin.Context) {
 	var maestros []maestroalumno.Maestro
 
-	models.DB.Order("maestro_id").Find(&maestros)
-
-	c.Header("Access-Control-Allow-Origin", "*")
+	database.DB.Order("maestro_id").Find(&maestros)
 
 	c.JSON(http.StatusOK, gin.H{"data": maestros})
 }
@@ -30,7 +28,7 @@ func CrearMaestro(c *gin.Context) {
 		return
 	}
 
-	if err := models.DB.Where("num_cedula=?", input.NumCedula).First(&per).Error; err == nil {
+	if err := database.DB.Where("num_cedula=?", input.NumCedula).First(&per).Error; err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Numero de cedula ya esta usado"})
 		return
 	}
@@ -38,9 +36,14 @@ func CrearMaestro(c *gin.Context) {
 	//crea crea al maestro en la base de datos
 	maestro := maestroalumno.Maestro{Nombre: input.Nombre, Apellido: input.Apellido, NumCedula: input.NumCedula}
 
-	models.DB.Create(&maestro)
-
-	c.Header("Access-Control-Allow-Origin", "*")
+	//inicio de la transaccion
+	tx := database.DB.Begin()
+	err := tx.Create(&maestro).Error
+	if err != nil {
+		tx.Rollback()
+	}
+	tx.Commit()
+	//fin de la transaccion
 
 	c.JSON(http.StatusOK, gin.H{"data": maestro})
 
@@ -50,12 +53,10 @@ func CrearMaestro(c *gin.Context) {
 func BuscarMaestro(c *gin.Context) {
 	var maestro maestroalumno.Maestro
 
-	if err := models.DB.Where("id=?", c.Param("id")).First(&maestro).Error; err != nil {
+	if err := database.DB.Where("id=?", c.Param("id")).First(&maestro).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No existe el maestro"})
 		return
 	}
-
-	c.Header("Access-Control-Allow-Origin", "*")
 
 	c.JSON(http.StatusOK, gin.H{"data": maestro})
 }
@@ -64,7 +65,7 @@ func BuscarMaestro(c *gin.Context) {
 func ActualizarMaestro(c *gin.Context) {
 	var maestro maestroalumno.Maestro
 
-	if err := models.DB.Where("id=?", c.Param("id")).First(&maestro).Error; err != nil {
+	if err := database.DB.Where("id=?", c.Param("id")).First(&maestro).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Maestro no econtrado"})
 	}
 
@@ -75,9 +76,14 @@ func ActualizarMaestro(c *gin.Context) {
 		return
 	}
 
-	models.DB.Model(&maestro).Updates(input)
-
-	c.Header("Access-Control-Allow-Origin", "*")
+	//inicio de la transaccion
+	tx := database.DB.Begin()
+	err := tx.Model(&maestro).Updates(input).Error
+	if err != nil {
+		tx.Rollback()
+	}
+	tx.Commit()
+	//fin de la transaccion
 
 	c.JSON(http.StatusOK, gin.H{"data": maestro})
 }
@@ -86,14 +92,18 @@ func ActualizarMaestro(c *gin.Context) {
 func EliminarMaestro(c *gin.Context) {
 	var maestro maestroalumno.Maestro
 
-	if err := models.DB.Where("id=?", c.Param("id")).First(&maestro).Error; err != nil {
+	if err := database.DB.Where("id=?", c.Param("id")).First(&maestro).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	models.DB.Delete(&maestro)
-
-	c.Header("Access-Control-Allow-Origin", "*")
+	//inicio de la transaccion
+	tx := database.DB.Begin()
+	err := tx.Delete(&maestro).Error
+	if err != nil {
+		tx.Rollback()
+	}
+	tx.Commit()
+	//fin de la transaccion
 
 	c.JSON(http.StatusOK, gin.H{"data": "Maestro eliminado"})
 }
@@ -103,10 +113,9 @@ func MostrarMaesAlum(c *gin.Context) {
 
 	var maesAlum []maestroalumno.MaestroAlumno
 
-	models.DB.Table("articulos").Order("articulo_id").Select("articulos.nombre, articulos.precio, articulos.cantidad, articulos.total," +
+	//modificar el query
+	database.DB.Table("articulos").Order("articulo_id").Select("articulos.nombre, articulos.precio, articulos.cantidad, articulos.total," +
 		"categoria.descripcion").Joins("JOIN categoria ON articulos.cat_id = categoria.categoria_id").Find(&maesAlum)
-
-	c.Header("Access-Control-Allow-Origin", "*")
 
 	c.JSON(http.StatusOK, gin.H{"data": maesAlum})
 }

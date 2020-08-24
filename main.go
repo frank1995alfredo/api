@@ -1,18 +1,12 @@
 package main
 
 import (
-	"fmt"
-
+	"github.com/frank1995alfredo/api/routes"
 	_ "github.com/frank1995alfredo/api/routes"
 )
 
 func main() {
-
-	//routes.Rutas()
-
-	var nums []int
-	nums = make([]int, 3)
-	nums[0] = 5
-	fmt.Println(nums)
+	//todo lo que se va a ejecutar de la aplicacion
+	routes.Rutas()
 
 }

@@ -1,27 +1,26 @@
-package controllers
+package libros
 
 import (
 	"net/http"
 	//sgsd
 
-	"github.com/frank1995alfredo/api/models"
+	database "github.com/frank1995alfredo/api/database"
+	libros "github.com/frank1995alfredo/api/models/libros"
 	"github.com/gin-gonic/gin"
 )
 
 //ObtenerLibros ... controlador para obtener todos los libros
 func ObtenerLibros(c *gin.Context) {
-	var libros []models.Libro
+	var libros []libros.Libro
 
-	models.DB.Order("id").Find(&libros)
-
-	c.Header("Access-Control-Allow-Origin", "*")
+	database.DB.Order("id").Find(&libros)
 
 	c.JSON(http.StatusOK, gin.H{"data": libros})
 }
 
 //CrearLibro ... funcion para inserta un libro nuevo
 func CrearLibro(c *gin.Context) {
-	var input models.CrearLibroInput
+	var input libros.CrearLibroInput
 
 	//para validar los inputs
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -30,47 +29,48 @@ func CrearLibro(c *gin.Context) {
 	}
 
 	//crea el libro en la base de datos
-	libro := models.Libro{Titulo: input.Titulo, Autor: input.Autor}
-	models.DB.Create(&libro)
-
-	c.Header("Access-Control-Allow-Origin", "*")
+	libro := libros.Libro{Titulo: input.Titulo, Autor: input.Autor}
+	database.DB.Create(&libro)
 
 	c.JSON(http.StatusOK, gin.H{"data": libro})
 }
 
 //BuscarLibro ... funcion para buscar un libro
 func BuscarLibro(c *gin.Context) {
-	var libro models.Libro
+	var libro libros.Libro
 
-	if err := models.DB.Where("id=?", c.Param("id")).First(&libro).Error; err != nil {
+	if err := database.DB.Where("id=?", c.Param("id")).First(&libro).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No encontrado"})
 		return
 	}
-
-	c.Header("Access-Control-Allow-Origin", "*")
 
 	c.JSON(http.StatusOK, gin.H{"data": libro})
 }
 
 //ActualizarLibro ... funcion para actualizar un libro :v
 func ActualizarLibro(c *gin.Context) {
-	var libro models.Libro
+	var libro libros.Libro
 
-	if err := models.DB.Where("id = ?", c.Param("id")).First(&libro).Error; err != nil {
+	if err := database.DB.Where("id = ?", c.Param("id")).First(&libro).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Libro no encontrado"})
 		return
 	}
 
 	//validamos la entrada de los datos
-	var input models.ActualizarLibro
+	var input libros.ActualizarLibro
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
 		return
 	}
 
-	models.DB.Model(&libro).Updates(input)
-
-	c.Header("Access-Control-Allow-Origin", "*")
+	//inicio de la transaccion
+	tx := database.DB.Begin()
+	err := tx.Model(&libro).Updates(input).Error
+	if err != nil {
+		tx.Rollback()
+	}
+	tx.Commit()
+	//fin de la transaccion
 
 	c.JSON(http.StatusOK, gin.H{"data": libro})
 }
@@ -78,15 +78,20 @@ func ActualizarLibro(c *gin.Context) {
 //EliminarLibro ... funcion que permite eliminar un libro
 func EliminarLibro(c *gin.Context) {
 
-	var libro models.Libro
-	if err := models.DB.Where("id=?", c.Param("id")).First(&libro).Error; err != nil {
+	var libro libros.Libro
+	if err := database.DB.Where("id=?", c.Param("id")).First(&libro).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Libro no encontrado"})
 		return
 	}
 
-	models.DB.Delete(&libro)
-
-	c.Header("Access-Control-Allow-Origin", "*")
+	//inicio de la transaccion
+	tx := database.DB.Begin()
+	err := tx.Delete(&libro).Error
+	if err != nil {
+		tx.Rollback()
+	}
+	tx.Commit()
+	//fin de la transaccion
 
 	c.JSON(http.StatusOK, gin.H{"data": true})
 }
