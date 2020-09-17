@@ -2,41 +2,26 @@ package maestroalumno
 
 //Maestro ... estructura de maestro
 type Maestro struct {
-	MaestroID int      `json:"idmaestro" gorm:"primary_key"`
-	Nombre    string   `json:"nombreMaestro" gorm:"size:50"`
-	Apellido  string   `json:"apellidoMaestro" gorm:"size:50"`
-	NumCedula string   `json:"numcedula" gorm:"size:11"`
-	Alumnos   []Alumno `gorm:"Foreingkey:MaesID"`
+	MaestroID uint     `json:"maestroid" gorm:"primary_key"`
+	Nombre    string   `json:"nombre"`
+	Apellido  string   `json:"apellido"`
+	NumCedula string   `json:"numcedula"`
+	Alumnos   []Alumno `json:"alumnos" gorm:"foreignkey:MaesID"`
 }
 
-//Alumno ... estructura de alumno, estructura que se relaciona con maestro
+//Alumno ...
 type Alumno struct {
-	AlumnoID int    `json:"idalumno" gorm:"primary_key"`
-	Nombre   string `json:"nombreAlumno" gorm:"size:50"`
-	Apellido string `json:"apellidoAlumno" gorm:"size:50"`
-	Edad     int    `json:"edad" gorm:"not null"`
-	MaesID   int    `json:"maesid" gorm:"not null"`
+	AlumnoID uint   `json:"alumnoid" gorm:"primary_key"`
+	Nombre   string `json:"nombreAlumno"`
+	Apellido string `json:"apellidoAlumno"`
+	Edad     int    `json:"edadAlumno"`
+	MaesID   uint   `json:"maesid"`
 }
 
-/*MaestroAlumno ... estructura que hereda de Maestro y Alumno
-no se hace migracion de esta estructura*/
+//MaestroAlumno ...
 type MaestroAlumno struct {
-	Maestro
 	Alumno
-}
-
-//CrearMaestroInput ... structura para valida los inpu
-type CrearMaestroInput struct {
-	Nombre    string `json:"nombre" binding:"required"`
-	Apellido  string `json:"apellido" binding:"required"`
-	NumCedula string `json:"numcedula" binding:"required"`
-}
-
-//ActualizarMaestroInput ... estructura para valida los input al momento de actualizar los campo
-type ActualizarMaestroInput struct {
-	Nombre    string `json:"nombre" binding:"required"`
-	Apellido  string `json:"apellido" binding:"required"`
-	NumCedula string `json:"numcedula" binding:"required"`
+	Maestro
 }
 
 //CrearAlumnoInput ... estructura para validar los inputs

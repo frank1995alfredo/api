@@ -1,4 +1,4 @@
-package models
+package libros
 
 //Libro ... modelo libro
 type Libro struct {
@@ -13,7 +13,7 @@ type CrearLibroInput struct {
 	Autor  string `json:"autor" binding:"required"`
 }
 
-//ActualizarLibro ... estructura para validar y actulizar el libro
+//ActualizarLibro ... estructura para validar y actualizar el libro
 type ActualizarLibro struct {
 	Titulo string `json:"titulo"`
 	Autor  string `json:"autor"`

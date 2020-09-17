@@ -15,7 +15,7 @@ func ObtenerLibros(c *gin.Context) {
 
 	database.DB.Order("id").Find(&libros)
 
-	c.JSON(http.StatusOK, gin.H{"data": libros})
+	c.SecureJSON(http.StatusOK, gin.H{"data": libros})
 }
 
 //CrearLibro ... funcion para inserta un libro nuevo
@@ -32,7 +32,7 @@ func CrearLibro(c *gin.Context) {
 	libro := libros.Libro{Titulo: input.Titulo, Autor: input.Autor}
 	database.DB.Create(&libro)
 
-	c.JSON(http.StatusOK, gin.H{"data": libro})
+	c.SecureJSON(http.StatusOK, gin.H{"data": libro})
 }
 
 //BuscarLibro ... funcion para buscar un libro
@@ -44,7 +44,7 @@ func BuscarLibro(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": libro})
+	c.SecureJSON(http.StatusOK, gin.H{"data": libro})
 }
 
 //ActualizarLibro ... funcion para actualizar un libro :v
@@ -62,7 +62,6 @@ func ActualizarLibro(c *gin.Context) {
 		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
 		return
 	}
-
 	//inicio de la transaccion
 	tx := database.DB.Begin()
 	err := tx.Model(&libro).Updates(input).Error
@@ -72,7 +71,7 @@ func ActualizarLibro(c *gin.Context) {
 	tx.Commit()
 	//fin de la transaccion
 
-	c.JSON(http.StatusOK, gin.H{"data": libro})
+	c.SecureJSON(http.StatusOK, gin.H{"data": libro})
 }
 
 //EliminarLibro ... funcion que permite eliminar un libro
@@ -93,5 +92,5 @@ func EliminarLibro(c *gin.Context) {
 	tx.Commit()
 	//fin de la transaccion
 
-	c.JSON(http.StatusOK, gin.H{"data": true})
+	c.SecureJSON(http.StatusOK, gin.H{"data": true})
 }

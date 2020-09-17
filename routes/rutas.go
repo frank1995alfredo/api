@@ -19,6 +19,8 @@ func Rutas() {
 	r := gin.Default()
 	r.Use(config.CORS)
 
+	//RutasLibros()
+	database.ConectorBD()
 	defer database.DB.Close()
 
 	libro := r.Group("/libros")
@@ -62,13 +64,11 @@ func Rutas() {
 	articulo := r.Group("/articulos")
 	{
 		articulo.GET("/obtenerArticulo", articulos.ObtenerArticulos)
-		articulo.GET("/listArticulo", articulos.PresentarArticuloCategoria)
+		articulo.GET("/listArticuloCat", articulos.PresentarArticuloCategoria)
 		articulo.POST("/crearArticulo", articulos.CrearArticulo)
+		articulo.POST("/eliminarArticulo/:id", articulos.EliminarArticulo)
 		articulo.GET("/buscarArticulo/:id", articulos.BuscarArticulo)
 		articulo.PATCH("/actualizarArticulo/:id", articulos.ActualizarArticulo)
 	}
-	//RutasLibros()
-	database.ConectorBD()
-
 	r.Run()
 }

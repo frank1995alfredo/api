@@ -15,7 +15,7 @@ func ObtenerAlumnos(c *gin.Context) {
 
 	database.DB.Order("alumno_id").Find(&alumno)
 
-	c.JSON(http.StatusOK, gin.H{"data": alumno})
+	c.SecureJSON(http.StatusOK, gin.H{"data": alumno})
 }
 
 //CrearAlumno ... funcion para insertar a una alumno
@@ -40,5 +40,5 @@ func CrearAlumno(c *gin.Context) {
 	}
 	tx.Commit()
 
-	c.JSON(http.StatusBadRequest, gin.H{"data": alumno})
+	c.SecureJSON(http.StatusBadRequest, gin.H{"data": alumno})
 }

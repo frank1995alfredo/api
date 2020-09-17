@@ -4,9 +4,10 @@ import (
 	"log"
 
 	articulos "github.com/frank1995alfredo/api/models/articulos"
-	maestroalumno "github.com/frank1995alfredo/api/models/maestroalumno"
+	"github.com/frank1995alfredo/api/models/maestroalumno"
 
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres" //asdads
 
 	//github.com/lib/pq ... libreria para manejar los pq, controla los orm
 	_ "github.com/lib/pq"
@@ -18,6 +19,7 @@ var DB *gorm.DB
 //ConectorBD ... permite conectar a la base de datos
 func ConectorBD() {
 	bd, err := gorm.Open("postgres", "host=localhost port=5432 user=postgres dbname=golang password=1234 sslmode=disable")
+
 	if err != nil {
 		log.Println(err.Error())
 	}
@@ -31,5 +33,5 @@ func ConectorBD() {
 	bd.AutoMigrate(&articulos.Articulo{}, &articulos.Categoria{})
 	bd.Model(&articulos.Articulo{}).AddForeignKey("cat_id", "categoria(categoria_id)", "CASCADE", "CASCADE")
 
-	DB = bd //toma la coneccion de la base de datos
+	DB = bd //toma la conexion de la base de datos
 }

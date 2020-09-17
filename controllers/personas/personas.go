@@ -14,12 +14,13 @@ func ObtenerPersona(c *gin.Context) {
 
 	database.DB.Order("id").Find(&personas)
 
-	c.JSON(http.StatusOK, gin.H{"data": personas})
+	c.SecureJSON(http.StatusOK, gin.H{"data": personas})
 
 }
 
 //CrearPersona ... funcion para inserar a una persona
 func CrearPersona(c *gin.Context) {
+
 	var input personas.CrearPersonaInput
 	var per []personas.Persona
 
@@ -44,7 +45,7 @@ func CrearPersona(c *gin.Context) {
 	}
 	tx.Commit()
 
-	c.JSON(http.StatusBadRequest, gin.H{"data": persona})
+	c.SecureJSON(http.StatusBadRequest, gin.H{"data": persona})
 }
 
 //BuscarPersona ... funcion para buscar a una persona
@@ -56,7 +57,7 @@ func BuscarPersona(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": persona})
+	c.SecureJSON(http.StatusOK, gin.H{"data": persona})
 }
 
 //ActualizarPersona ... funcion para actualizar persona
@@ -81,7 +82,7 @@ func ActualizarPersona(c *gin.Context) {
 	}
 	tx.Commit()
 
-	c.JSON(http.StatusOK, gin.H{"data": persona})
+	c.SecureJSON(http.StatusOK, gin.H{"data": persona})
 }
 
 //EliminarPersona ... funcion que permite eliminar un libro
@@ -100,5 +101,5 @@ func EliminarPersona(c *gin.Context) {
 	}
 	tx.Commit()
 
-	c.JSON(http.StatusOK, gin.H{"data": "Persona eliminada"})
+	c.SecureJSON(http.StatusOK, gin.H{"data": "Persona eliminada"})
 }

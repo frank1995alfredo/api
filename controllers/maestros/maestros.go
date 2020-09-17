@@ -14,39 +14,48 @@ func ObtenerMaestros(c *gin.Context) {
 
 	database.DB.Order("maestro_id").Find(&maestros)
 
-	c.JSON(http.StatusOK, gin.H{"data": maestros})
+	c.SecureJSON(http.StatusOK, gin.H{"data": maestros})
 }
 
 //CrearMaestro ...  funciona para craar un maestro
 func CrearMaestro(c *gin.Context) {
-	var input maestroalumno.CrearMaestroInput
-	var per []maestroalumno.Maestro
 
-	//validaops los inputs
+	//CrearMaestroInput ... structura para validar los inputs
+	type CrearMaestroInput struct {
+		Nombre         string `json:"nombre"`
+		Apellido       string `json:"apellido"`
+		NumCedula      string `json:"numcedula"`
+		NombreAlumno   string `json:"nombreAlumno"`
+		ApellidoAlumno string `json:"apellidoAlumno"`
+		EdadAlumno     int    `json:"edadAlumno"`
+	}
+
+	//input toma los atributos de CrearMaestroInput, sirve para validar los input del frontend
+	var input CrearMaestroInput
+
+	//validamos los inputs
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := database.DB.Where("num_cedula=?", input.NumCedula).First(&per).Error; err == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Numero de cedula ya esta usado"})
-		return
-	}
+	maestro := maestroalumno.Maestro{Nombre: input.Nombre,
+		Apellido:  input.Apellido,
+		NumCedula: input.NumCedula,
+		Alumnos: []maestroalumno.Alumno{{Nombre: input.NombreAlumno,
+			Apellido: input.ApellidoAlumno, Edad: input.EdadAlumno}}}
 
-	//crea crea al maestro en la base de datos
-	maestro := maestroalumno.Maestro{Nombre: input.Nombre, Apellido: input.Apellido, NumCedula: input.NumCedula}
-
-	//inicio de la transaccion
+	/*maestro := database.DB.Debug().Save(&maestroalumno.Maestro{Nombre: "Juanito", Apellido: "RAMIREZ", NumCedula: "2100373873",
+	Alumnos: []maestroalumno.Alumno{{Nombre: "franklin", Apellido: "canadas", Edad: 25}}})*/
 	tx := database.DB.Begin()
-	err := tx.Create(&maestro).Error
+	err := tx.Debug().Save(&maestro).Error
 	if err != nil {
 		tx.Rollback()
 	}
 	tx.Commit()
 	//fin de la transaccion
 
-	c.JSON(http.StatusOK, gin.H{"data": maestro})
-
+	c.SecureJSON(http.StatusOK, gin.H{"data": maestro})
 }
 
 //BuscarMaestro ... funcion para buscar el maestro
@@ -58,11 +67,19 @@ func BuscarMaestro(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": maestro})
+	c.SecureJSON(http.StatusOK, gin.H{"data": maestro})
 }
 
 //ActualizarMaestro ... funcion para actualiar un maetro
 func ActualizarMaestro(c *gin.Context) {
+
+	//ActualizarMaestroInput ... estructura para valida los input al momento de actualizar los campo
+	type ActualizarMaestroInput struct {
+		Nombre    string `json:"nombre" binding:"required"`
+		Apellido  string `json:"apellido" binding:"required"`
+		NumCedula string `json:"numcedula" binding:"required"`
+	}
+
 	var maestro maestroalumno.Maestro
 
 	if err := database.DB.Where("id=?", c.Param("id")).First(&maestro).Error; err != nil {
@@ -70,7 +87,7 @@ func ActualizarMaestro(c *gin.Context) {
 	}
 
 	//validamos la entrada de los datos
-	var input maestroalumno.ActualizarMaestroInput
+	var input ActualizarMaestroInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
 		return
@@ -85,7 +102,7 @@ func ActualizarMaestro(c *gin.Context) {
 	tx.Commit()
 	//fin de la transaccion
 
-	c.JSON(http.StatusOK, gin.H{"data": maestro})
+	c.SecureJSON(http.StatusOK, gin.H{"data": maestro})
 }
 
 //EliminarMaestro ... funcion para eliminar un maestro
@@ -105,7 +122,7 @@ func EliminarMaestro(c *gin.Context) {
 	tx.Commit()
 	//fin de la transaccion
 
-	c.JSON(http.StatusOK, gin.H{"data": "Maestro eliminado"})
+	c.SecureJSON(http.StatusOK, gin.H{"data": "Maestro eliminado"})
 }
 
 //MostrarMaesAlum ... funcion para datos del amestro y el alumno
@@ -117,5 +134,5 @@ func MostrarMaesAlum(c *gin.Context) {
 	database.DB.Table("articulos").Order("articulo_id").Select("articulos.nombre, articulos.precio, articulos.cantidad, articulos.total," +
 		"categoria.descripcion").Joins("JOIN categoria ON articulos.cat_id = categoria.categoria_id").Find(&maesAlum)
 
-	c.JSON(http.StatusOK, gin.H{"data": maesAlum})
+	c.SecureJSON(http.StatusOK, gin.H{"data": maesAlum})
 }
