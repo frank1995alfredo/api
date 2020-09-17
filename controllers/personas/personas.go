@@ -21,7 +21,13 @@ func ObtenerPersona(c *gin.Context) {
 //CrearPersona ... funcion para inserar a una persona
 func CrearPersona(c *gin.Context) {
 
-	var input personas.CrearPersonaInput
+	//CrearPersonaInput ... estructura para validar e insertar a una persona
+	type CrearPersonaInput struct {
+		Nombre    string `json:"nombre" binding:"required"`
+		Apellido  string `json:"apellido" binding:"required"`
+		NumCedula string `json:"numcedula" binding:"required"`
+	}
+	var input CrearPersonaInput
 	var per []personas.Persona
 
 	//validaops los inputs
@@ -62,14 +68,23 @@ func BuscarPersona(c *gin.Context) {
 
 //ActualizarPersona ... funcion para actualizar persona
 func ActualizarPersona(c *gin.Context) {
+
+	//ActualizarPersonaInput ... estructura para validar y actualizar
+	type ActualizarPersonaInput struct {
+		Nombre    string `json:"nombre"`
+		Apellido  string `json:"apellido"`
+		NumCedula string `json:"numcedula"`
+	}
+
 	var persona personas.Persona
+	var input ActualizarPersonaInput
 
 	if err := database.DB.Where("id=?", c.Param("id")).First(&persona).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Persona no econtrada"})
 	}
 
 	//validamos la entrada de los datos
-	var input personas.ActualizarPersonaInput
+
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
 		return

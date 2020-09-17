@@ -45,8 +45,6 @@ func CrearMaestro(c *gin.Context) {
 		Alumnos: []maestroalumno.Alumno{{Nombre: input.NombreAlumno,
 			Apellido: input.ApellidoAlumno, Edad: input.EdadAlumno}}}
 
-	/*maestro := database.DB.Debug().Save(&maestroalumno.Maestro{Nombre: "Juanito", Apellido: "RAMIREZ", NumCedula: "2100373873",
-	Alumnos: []maestroalumno.Alumno{{Nombre: "franklin", Apellido: "canadas", Edad: 25}}})*/
 	tx := database.DB.Begin()
 	err := tx.Debug().Save(&maestro).Error
 	if err != nil {

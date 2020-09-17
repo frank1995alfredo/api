@@ -23,11 +23,3 @@ type MaestroAlumno struct {
 	Alumno
 	Maestro
 }
-
-//CrearAlumnoInput ... estructura para validar los inputs
-type CrearAlumnoInput struct {
-	Nombre   string `json:"nombre" binding:"required"`
-	Apellido string `json:"apellido" binding:"required"`
-	Edad     int    `json:"edad" binding:"required"`
-	MaesID   int    `json:"maesid" binding:"required"`
-}

@@ -20,7 +20,15 @@ func ObtenerAlumnos(c *gin.Context) {
 
 //CrearAlumno ... funcion para insertar a una alumno
 func CrearAlumno(c *gin.Context) {
-	var input maestroalumno.Alumno
+
+	//CrearAlumnoInput ... estructura para validar los inputs
+	type CrearAlumnoInput struct {
+		Nombre   string `json:"nombre" binding:"required"`
+		Apellido string `json:"apellido" binding:"required"`
+		Edad     int    `json:"edad" binding:"required"`
+		MaesID   uint   `json:"maesid" binding:"required"`
+	}
+	var input CrearAlumnoInput
 
 	//validaops los inputs
 	if err := c.ShouldBindJSON(&input); err != nil {
